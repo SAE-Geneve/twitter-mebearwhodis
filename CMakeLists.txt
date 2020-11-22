@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 if(WIN32)
     add_compile_options("/std:c++latest")
-    # Change this to 0x0603 for windows 8.
-    add_compile_options("/D _WIN32_WINNT=0x0A00")
+    add_compile_options("/D _WIN32_WINNT=0x0603")
 endif(WIN32)
 set(CMAKE_CXX_STANDARD 17)
 
