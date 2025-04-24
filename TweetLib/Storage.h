@@ -2,6 +2,7 @@
 
 #include <string>
 #include <mutex>
+#include <random>
 #include <unordered_map>
 
 namespace tweet {
@@ -16,30 +17,32 @@ namespace tweet {
 	class Storage 
 	{
 	public:
+		Storage();
 		bool Tweet(
-			const std::string& context,
+			std::int64_t token,
 			const std::string& text);
 		bool Follow(
-			const std::string& context,
+			std::int64_t token,
 			const std::string& name);
 		const std::vector<TweetValue> Show(
-			const std::string& context, 
+			std::int64_t token,
 			const std::string& name);
-		bool Login(
-			const std::string& context,
+		std::optional<std::int64_t> Login(
 			const std::string& name,
 			const std::string& pass);
-		bool Logout(const std::string& context);
-		bool Register(
-			const std::string& context,
+		bool Logout(std::int64_t token);
+		std::optional<std::int64_t> Register(
 			const std::string& name,
 			const std::string& pass);
+		std::int64_t GenerateToken();
 
 	protected:
 		std::mutex mutex_ = {};
+		std::mt19937_64 engine_ = {};
+		std::uniform_int_distribution<std::int64_t> dist_;
 		std::unordered_multimap<std::string, TweetValue> name_tweets_ = {};
 		std::unordered_multimap<std::string, std::string> followers_ = {};
-		std::unordered_map<std::string, std::string> context_names_ = {};
+		std::unordered_map<std::int64_t, std::string> token_names_ = {};
 		std::unordered_map<std::string, std::string> name_passes_ = {};
 	};
 

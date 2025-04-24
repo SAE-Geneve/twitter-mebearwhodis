@@ -5,12 +5,17 @@
 
 namespace tweet {
 
-	bool Storage::Tweet(const std::string& context, const std::string& text)
+	Storage::Storage() : engine_(std::random_device{}()), dist_(std::numeric_limits<std::int64_t>::min(), std::numeric_limits<std::int64_t>::max())
+	{
+
+	}
+
+	bool Storage::Tweet(std::int64_t token, const std::string& text)
 	{
 		std::scoped_lock l(mutex_);
 		// Check if you are already login.
-		auto it = context_names_.find(context);
-		if (it == context_names_.end())
+		auto it = token_names_.find(token);
+		if (it == token_names_.end())
 		{
 			return false;
 		}
@@ -26,12 +31,12 @@ namespace tweet {
 		return true;
 	}
 
-	bool Storage::Follow(const std::string& context, const std::string& name)
+	bool Storage::Follow(std::int64_t token, const std::string& name)
 	{
 		std::scoped_lock l(mutex_);
 		// Check if you are already login.
-		auto it = context_names_.find(context);
-		if (it == context_names_.end())
+		auto it = token_names_.find(token);
+		if (it == token_names_.end())
 		{
 			return false;
 		}
@@ -60,19 +65,20 @@ namespace tweet {
 	}
 
 	const std::vector<TweetValue> Storage::Show(
-		const std::string& context,
+		std::int64_t token,
 		const std::string& name)
 	{
 		std::scoped_lock l(mutex_);
 		// Check if you are already login.
-		auto it = context_names_.find(context);
-		if (it == context_names_.end())
+
+		if (!token_names_.contains(token))
 		{
 			return {};
 		}
 		bool found = false;
+		auto it = token_names_.find(token);
 		// Check if current user.
-		if (name == it->second)
+		if (it->second == name)
 		{
 			found = true;
 		}
@@ -108,8 +114,7 @@ namespace tweet {
 		return {};
 	}
 
-	bool Storage::Login(
-		const std::string& context, 
+	std::optional<std::int64_t> Storage::Login(
 		const std::string& name, 
 		const std::string& pass)
 	{
@@ -118,31 +123,31 @@ namespace tweet {
 		auto it = name_passes_.find(name);
 		if (it == name_passes_.end())
 		{
-			return false;
+			return std::nullopt;
 		}
 		// Check the password.
 		if (pass == it->second)
 		{
-			context_names_.insert({ context, name });
-			return true;
+			auto token = GenerateToken();
+			token_names_.insert({ token, name });
+			return token;
 		}
-		return false;
+		return std::nullopt;
 	}
 
-	bool Storage::Logout(const std::string& context)
+	bool Storage::Logout(std::int64_t token)
 	{
 		std::scoped_lock l(mutex_);
-		auto it = context_names_.find(context);
-		if (it == context_names_.end())
+		auto it = token_names_.find(token);
+		if (it == token_names_.end())
 		{
 			return false;
 		}
-		context_names_.erase(it);
+		token_names_.erase(it);
 		return true;
 	}
 
-	bool Storage::Register(
-		const std::string& context, 
+	std::optional<std::int64_t> Storage::Register(
 		const std::string& name, 
 		const std::string& pass)
 	{
@@ -151,11 +156,16 @@ namespace tweet {
 		auto it = name_passes_.find(name);
 		if (it != name_passes_.end())
 		{
-			return false;
+			return std::nullopt;
 		}
 		name_passes_.insert({ name, pass });
-		context_names_.insert({ context, name });
+		auto token = GenerateToken();
+		token_names_.insert({ token, name });
 		return true;
 	}
 
+	std::int64_t Storage::GenerateToken()
+	{
+		return dist_(engine_);
+	}
 } // End namespace tweet.

@@ -19,6 +19,7 @@ message TweetIn {
     string user = 1;
     string content = 2;
     int64 time = 3;
+    int64 token = 4;
 }
 
 message TweetOut {
@@ -27,6 +28,7 @@ message TweetOut {
 
 message FollowIn {
     string name = 1;
+    int64 token = 2;
 }
 
 message FollowOut {
@@ -35,6 +37,7 @@ message FollowOut {
 
 message ShowIn {
     string user = 1;
+    int64 token = 2;
 }
 
 message ShowOut {
@@ -49,12 +52,23 @@ message LoginIn {
 
 message LoginOut {
     bool error = 1;
+    int64 token = 2;
 }
 
-message LogoutIn {}
+message LogoutIn {
+    int64 token = 1;
+}
 
 message LogoutOut {
     bool error = 1;
+}
+
+message UpdateIn {
+    int64 token = 1;
+}
+
+message UpdateOut {
+    TweetIn tweet = 1;
 }
 
 message RegisterIn {
@@ -64,13 +78,15 @@ message RegisterIn {
 
 message RegisterOut {
     bool error = 1;
+    int64 token = 2;
 }
 
 service TweetService {
-    rpc Tweet(TweetIn) returns (TweetOut) {}
-    rpc Follow(FollowIn) returns (FollowOut) {}
-    rpc Show(ShowIn) returns (ShowOut) {}
-    rpc Login(LoginIn) returns (LoginOut) {}
-    rpc Logout(LogoutIn) returns (LogoutOut) {}
-    rpc Register(RegisterIn) returns (RegisterOut) {}
+    rpc Tweet(TweetIn) returns (TweetOut);
+    rpc Follow(FollowIn) returns (FollowOut);
+    rpc Show(ShowIn) returns (ShowOut);
+    rpc Login(LoginIn) returns (LoginOut);
+    rpc Logout(LogoutIn) returns (LogoutOut);
+    rpc Update(UpdateIn) returns (UpdateOut);
+    rpc Register(RegisterIn) returns (RegisterOut);
 }

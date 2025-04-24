@@ -7,12 +7,9 @@ namespace tweet
         const proto::TweetIn* request,
         proto::TweetOut* response)
     {
-        
-        std::string client = context->peer().substr(0, 
-            context->peer().find_last_of(':'));
-        
+
         bool value = storage_->Tweet(
-            client,
+            request->token(),
             request->content());
         response->set_error(value);
         return grpc::Status::OK;
@@ -23,12 +20,9 @@ namespace tweet
         const proto::FollowIn* request,
         proto::FollowOut* response)
     {
-        
-        std::string client = context->peer().substr(0, 
-            context->peer().find_last_of(':'));
-        
+
         bool value = storage_->Follow(
-            client,
+            request->token(),
             request->name());
         response->set_error(value);
         return grpc::Status::OK;
@@ -39,11 +33,8 @@ namespace tweet
         const proto::ShowIn* request,
         proto::ShowOut* response)
     {
-        std::string client = context->peer().substr(0, 
-            context->peer().find_last_of(':'));
-        
         const auto tweets = storage_->Show(
-            client,
+            request->token(),
             request->user());
         for (const auto& tweet : tweets)
         {
@@ -62,14 +53,11 @@ namespace tweet
         const proto::LoginIn* request,
         proto::LoginOut* response)
     {
-        std::string client = context->peer().substr(0, 
-            context->peer().find_last_of(':'));
-        
-        bool value = storage_->Login(
-            client,
+        auto maybe_token = storage_->Login(
             request->user(),
             request->pass());
-        response->set_error(value);
+        response->set_error(maybe_token.has_value());
+        response->set_token(maybe_token.value());
         return grpc::Status::OK;
     }
 
@@ -78,11 +66,8 @@ namespace tweet
         const proto::LogoutIn* request,
         proto::LogoutOut* response)
     {
-        std::string client = context->peer().substr(0, 
-            context->peer().find_last_of(':'));
-        
         bool value = storage_->Logout(
-            client);
+            request->token());
         response->set_error(value);
         return grpc::Status::OK;
     }
@@ -92,14 +77,12 @@ namespace tweet
         const proto::RegisterIn* request,
         proto::RegisterOut* response)
     {
-        std::string client = context->peer().substr(0, 
-            context->peer().find_last_of(':'));
-        
-        bool value = storage_->Register(
-            client,
+        auto maybe_token =
+            storage_->Register(
             request->name(),
             request->pass());
-        response->set_error(value);
+        response->set_error(maybe_token.has_value());
+        response->set_token(maybe_token.value());
         return grpc::Status::OK;
     }
 } // End namespace tweet.
