@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iterator>
 #include <chrono>
+#include <map>
 
 namespace tweet {
 
@@ -167,5 +168,36 @@ namespace tweet {
 	std::int64_t Storage::GenerateToken()
 	{
 		return dist_(engine_);
+	}
+
+	std::string Storage::GetNameFromToken(std::int64_t token) const
+	{
+		return token_names_.at(token);
+	}
+
+	std::vector<std::string> Storage::GetFollowerList(const std::string& name) const
+	{
+		std::vector<std::string> out;
+		out.push_back(name);
+		auto range = followers_.equal_range(name);
+		for (auto it = range.first; it != range.second; ++it)
+		{
+			out.push_back(it->second);
+		}
+		return out;
+	}
+
+	std::vector<TweetValue> Storage::GetTweetsFromNameTime(const std::string& name, std::int64_t time_s) const
+	{
+		std::vector<TweetValue> tweets;
+
+		auto range = name_tweets_.equal_range(name);
+		for (auto it = range.first; it != range.second; ++it)
+		{
+			if (it->second.time > time_s)
+				tweets.push_back(it->second);
+		}
+
+		return tweets;
 	}
 } // End namespace tweet.

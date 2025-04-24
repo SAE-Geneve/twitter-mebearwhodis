@@ -35,6 +35,9 @@ namespace tweet {
 			const std::string& name,
 			const std::string& pass);
 		std::int64_t GenerateToken();
+		std::string GetNameFromToken(std::int64_t token) const;
+		std::vector<std::string> GetFollowerList(const std::string& name) const;
+		std::vector<TweetValue> GetTweetsFromNameTime(const std::string& name, std::int64_t time_s) const;
 
 	protected:
 		std::mutex mutex_ = {};

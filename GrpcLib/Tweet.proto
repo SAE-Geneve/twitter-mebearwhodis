@@ -68,7 +68,7 @@ message UpdateIn {
 }
 
 message UpdateOut {
-    TweetIn tweet = 1;
+    repeated TweetIn tweets = 1;
 }
 
 message RegisterIn {
@@ -87,6 +87,6 @@ service TweetService {
     rpc Show(ShowIn) returns (ShowOut);
     rpc Login(LoginIn) returns (LoginOut);
     rpc Logout(LogoutIn) returns (LogoutOut);
-    rpc Update(UpdateIn) returns (UpdateOut);
+    rpc Update(UpdateIn) returns (stream UpdateOut);
     rpc Register(RegisterIn) returns (RegisterOut);
 }
